@@ -1,5 +1,5 @@
 # bigdata2016-minskq3-task4
-Task4: MapReduce jobs with secondary sort
+Task4: MapReduce job with secondary sort
 
 
 ###STEP 1 
