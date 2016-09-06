@@ -55,31 +55,42 @@ public class SecondarySortJobTest {
         mapDriver.runTest();
     }
 
-//    @Test
-//    public void testReducer() throws IOException {
-//        List<CustomKey> values1 = new ArrayList<CustomKey>();
-//        values1.add(new CustomKey(1, 254));
-//        values1.add(new CustomKey(1, 254));
-//        reduceDriver.withInput(new Text(ip1), values1);
-//
-//        List<CustomKey> values2 = new ArrayList<CustomKey>();
-//        values2.add(new CustomKey(1, 254));
-//        reduceDriver.withInput(new Text(ip2), values2);
-//
-//        reduceDriver.withOutput(new Text(ip1), new CustomKey(2, 508));
-//        reduceDriver.withOutput(new Text(ip2), new CustomKey(1, 254));
-//        reduceDriver.runTest();
-//    }
-//
-//    @Test
-//    public void testMapReduce() throws IOException {
-//        mapReduceDriver.withInput(new LongWritable(), new Text(input1));
-//        mapReduceDriver.withInput(new LongWritable(), new Text(input2));
-//        mapReduceDriver.withInput(new LongWritable(), new Text(input3));
-//
-//        mapReduceDriver.withOutput(new Text(ip1), new CustomKey(2, 508));
-//        mapReduceDriver.withOutput(new Text(ip2), new CustomKey(1, 254));
-//
-//        mapReduceDriver.runTest();
-//    }
+    @Test
+    public void testReducer() throws IOException {
+        List<Text> values1 = new ArrayList<Text>();
+        values1.add(new Text(input1));
+        List<Text> values3 = new ArrayList<Text>();
+        values3.add(new Text(input3));
+        reduceDriver.withInput(new CustomKey(ip1, timestamp1), values1);
+        reduceDriver.withInput(new CustomKey(ip1, timestamp3), values3);
+
+        List<Text> values2 = new ArrayList<Text>();
+        values2.add(new Text(input2));
+        List<Text> values4 = new ArrayList<Text>();
+        values4.add(new Text(input4));
+        reduceDriver.withInput(new CustomKey(ip2, timestamp2), values2);
+        reduceDriver.withInput(new CustomKey(ip2, timestamp4), values4);
+
+        reduceDriver.withOutput(NullWritable.get(), new Text(input1));
+        reduceDriver.withOutput(NullWritable.get(), new Text(input3));
+        reduceDriver.withOutput(NullWritable.get(), new Text(input2));
+        reduceDriver.withOutput(NullWritable.get(), new Text(input4));
+
+        reduceDriver.runTest();
+    }
+
+    @Test
+    public void testMapReduce() throws IOException {
+        mapReduceDriver.withInput(new LongWritable(), new Text(input1));
+        mapReduceDriver.withInput(new LongWritable(), new Text(input2));
+        mapReduceDriver.withInput(new LongWritable(), new Text(input3));
+        mapReduceDriver.withInput(new LongWritable(), new Text(input4));
+
+        mapReduceDriver.withOutput(NullWritable.get(), new Text(input4));
+        mapReduceDriver.withOutput(NullWritable.get(), new Text(input2));
+        mapReduceDriver.withOutput(NullWritable.get(), new Text(input3));
+        mapReduceDriver.withOutput(NullWritable.get(), new Text(input1));
+
+        mapReduceDriver.runTest();
+    }
 }

@@ -39,12 +39,13 @@ public class SecondarySortJob {
 
             long siteImpressionSum = 0;
             for (Text val : values) {
+                context.write(nullKey, val);
+
                 String logLine = val.toString();
                 int streamId = Integer.parseInt(logLine.substring(logLine.length() - 1));
                 if (streamId == 1) {
                     siteImpressionSum++;
                 }
-                context.write(nullKey, val);
             }
 
             if (maxSiteImpressionSum <= siteImpressionSum) {
