@@ -33,13 +33,26 @@ public class SecondarySortJob {
     public static class LogsReducer extends Reducer<CustomKey, Text, NullWritable, Text> {
 
         NullWritable nullKey = NullWritable.get();
+        long maxSiteImpressionSum = 0;
 
         public void reduce(CustomKey key, Iterable<Text> values, Reducer<CustomKey, Text, NullWritable, Text>.Context context) throws IOException, InterruptedException {
 
+            long siteImpressionSum = 0;
             for (Text val : values) {
+                String logLine = val.toString();
+                int streamId = Integer.parseInt(logLine.substring(logLine.length() - 1));
+                if (streamId == 1) {
+                    siteImpressionSum++;
+                }
                 context.write(nullKey, val);
             }
 
+            if (maxSiteImpressionSum <= siteImpressionSum) {
+                maxSiteImpressionSum = siteImpressionSum;
+                context.getCounter("DynamicCounter",key.getiPinyouID()).setValue(siteImpressionSum);
+                context.getCounter(StreamIdType.SITEIMPRESSION).setValue(siteImpressionSum);
+
+            }
         }
     }
 
@@ -74,10 +87,16 @@ public class SecondarySortJob {
 
         boolean result = job.waitForCompletion(true);
 
-//        System.out.println("Browsers Counter :");
-//        for (Counter counter : job.getCounters().getGroup(Browser.class.getCanonicalName())) {
-//            System.out.println(" - " + counter.getDisplayName() + ": " + counter.getValue());
-//        }
+        Counters counters = job.getCounters();
+        Counter maxValueCounter = counters.getGroup(StreamIdType.class.getCanonicalName()).findCounter(StreamIdType.SITEIMPRESSION.toString(),false);
+        long maxValueCount = maxValueCounter.getValue();
+
+        //System.out.println("iPinyou ID with the biggest ammount of site-impression :");
+        for (Counter counter : counters.getGroup("DynamicCounter")) {
+            if (Long.compare(counter.getValue(),maxValueCount) == 0) {
+                System.out.println("iPinyou ID: " + counter.getName() + ", the biggest amount of site impression: " + counter.getValue());
+            }
+        }
 
         System.exit(result ? 0 : 1);
     }
