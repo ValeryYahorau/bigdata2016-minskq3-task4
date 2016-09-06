@@ -3,7 +3,7 @@ package com.epam.bigdata2016.minskq3.task4;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 
-public class CustomKeyGroupingComparator extends WritableComparator{
+public class CustomKeyGroupingComparator extends WritableComparator {
 
     public CustomKeyGroupingComparator() {
         super(CustomKey.class, true);

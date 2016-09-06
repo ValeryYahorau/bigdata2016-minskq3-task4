@@ -49,7 +49,7 @@ public class SecondarySortJob {
 
             if (maxSiteImpressionSum <= siteImpressionSum) {
                 maxSiteImpressionSum = siteImpressionSum;
-                context.getCounter("DynamicCounter",key.getiPinyouID()).setValue(siteImpressionSum);
+                context.getCounter("DynamicCounter", key.getiPinyouID()).setValue(siteImpressionSum);
                 context.getCounter(StreamIdType.SITEIMPRESSION).setValue(siteImpressionSum);
 
             }
@@ -88,12 +88,12 @@ public class SecondarySortJob {
         boolean result = job.waitForCompletion(true);
 
         Counters counters = job.getCounters();
-        Counter maxValueCounter = counters.getGroup(StreamIdType.class.getCanonicalName()).findCounter(StreamIdType.SITEIMPRESSION.toString(),false);
+        Counter maxValueCounter = counters.getGroup(StreamIdType.class.getCanonicalName()).findCounter(StreamIdType.SITEIMPRESSION.toString(), false);
         long maxValueCount = maxValueCounter.getValue();
 
         //System.out.println("iPinyou ID with the biggest ammount of site-impression :");
         for (Counter counter : counters.getGroup("DynamicCounter")) {
-            if (Long.compare(counter.getValue(),maxValueCount) == 0) {
+            if (Long.compare(counter.getValue(), maxValueCount) == 0) {
                 System.out.println("iPinyou ID: " + counter.getName() + ", the biggest amount of site impression: " + counter.getValue());
             }
         }

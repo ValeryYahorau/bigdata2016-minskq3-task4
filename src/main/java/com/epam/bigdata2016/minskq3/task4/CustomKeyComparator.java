@@ -14,9 +14,9 @@ public class CustomKeyComparator extends WritableComparator {
         CustomKey cik1 = (CustomKey) a;
         CustomKey cik2 = (CustomKey) b;
         int iPinyouIDCmp = cik1.getiPinyouID().compareToIgnoreCase(cik2.getiPinyouID());
-        if (iPinyouIDCmp != 0 ) {
+        if (iPinyouIDCmp != 0) {
             return iPinyouIDCmp;
         }
-        return Long.compare(cik1.getTimestam(),cik2.getTimestam());
+        return Long.compare(cik1.getTimestam(), cik2.getTimestam());
     }
 }

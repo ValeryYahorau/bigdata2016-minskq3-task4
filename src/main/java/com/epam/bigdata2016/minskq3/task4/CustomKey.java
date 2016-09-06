@@ -32,10 +32,10 @@ public class CustomKey implements WritableComparable<CustomKey> {
     @Override
     public int compareTo(CustomKey w) {
         int iPinyouIDCmp = iPinyouID.compareToIgnoreCase(w.iPinyouID);
-        if (iPinyouIDCmp != 0 ) {
+        if (iPinyouIDCmp != 0) {
             return iPinyouIDCmp;
         }
-        return Long.compare(timestam,w.timestam);
+        return Long.compare(timestam, w.timestam);
     }
 
     public String getiPinyouID() {
