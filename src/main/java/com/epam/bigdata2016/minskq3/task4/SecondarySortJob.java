@@ -10,6 +10,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SecondarySortJob {
 
@@ -33,7 +35,8 @@ public class SecondarySortJob {
     public static class LogsReducer extends Reducer<CustomKey, Text, NullWritable, Text> {
 
         NullWritable nullKey = NullWritable.get();
-        long maxSiteImpressionSum = 0;
+        private long maxSiteImpressionSum = 0;
+        private List<String> iPinyouIdList = new ArrayList<>();
 
         public void reduce(CustomKey key, Iterable<Text> values, Reducer<CustomKey, Text, NullWritable, Text>.Context context) throws IOException, InterruptedException {
 
@@ -44,15 +47,25 @@ public class SecondarySortJob {
                 String logLine = val.toString();
                 int streamId = Integer.parseInt(logLine.substring(logLine.length() - 1));
                 if (streamId == 1) {
-                    siteImpressionSum++;
+                    ++siteImpressionSum;
                 }
             }
 
-            if (maxSiteImpressionSum <= siteImpressionSum) {
+            if (maxSiteImpressionSum == siteImpressionSum && !"null".equals(key.getiPinyouID())) {
+                iPinyouIdList.add(key.getiPinyouID());
+            } else if (maxSiteImpressionSum < siteImpressionSum && !"null".equals(key.getiPinyouID())) {
+                iPinyouIdList.clear();
+                iPinyouIdList.add(key.getiPinyouID());
                 maxSiteImpressionSum = siteImpressionSum;
-                context.getCounter("DynamicCounter", key.getiPinyouID()).setValue(siteImpressionSum);
-                context.getCounter(StreamIdType.SITEIMPRESSION).setValue(siteImpressionSum);
+            }
+        }
 
+        @Override
+        protected void cleanup(Context context) throws IOException, InterruptedException {
+            if (iPinyouIdList.size() > 0) {
+                for (String currentIPinyouId : iPinyouIdList) {
+                    context.getCounter("DynamicCounter", currentIPinyouId).setValue(maxSiteImpressionSum);
+                }
             }
         }
     }
@@ -61,7 +74,7 @@ public class SecondarySortJob {
 
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        otherArgs = new String[]{"/Users/valeryyegorov/Downloads/testin2.txt", "/Users/valeryyegorov/Downloads/testout2.txt"};
+        //otherArgs = new String[]{"/Users/valeryyegorov/Downloads/in2.txt", "/Users/valeryyegorov/Downloads/out2.txt"};
 
         if (otherArgs.length < 2) {
             System.err.println("Usage: VisitsSpendsCount <in> <out>");
@@ -89,14 +102,10 @@ public class SecondarySortJob {
         boolean result = job.waitForCompletion(true);
 
         Counters counters = job.getCounters();
-        Counter maxValueCounter = counters.getGroup(StreamIdType.class.getCanonicalName()).findCounter(StreamIdType.SITEIMPRESSION.toString(), false);
-        long maxValueCount = maxValueCounter.getValue();
 
         //System.out.println("iPinyou ID with the biggest ammount of site-impression :");
         for (Counter counter : counters.getGroup("DynamicCounter")) {
-            if (Long.compare(counter.getValue(), maxValueCount) == 0) {
-                System.out.println("iPinyou ID: " + counter.getName() + ", the biggest amount of site impression: " + counter.getValue());
-            }
+            System.out.println("iPinyou ID: " + counter.getName() + ", the biggest amount of site impression: " + counter.getValue());
         }
 
         System.exit(result ? 0 : 1);
